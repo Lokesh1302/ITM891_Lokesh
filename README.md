@@ -1,5 +1,5 @@
 # ITM891
- This class is for Information technology Management
+ This class is for Large Scale Data Lab
 
  # Respository for Lokesh Dogga
 
