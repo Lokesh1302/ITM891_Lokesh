@@ -13,10 +13,10 @@
 * Clash of Clans Clans Dataset 2023 (3.5M Clans)
 * https://www.kaggle.com/datasets/asaniczka/clash-of-clans-clans-dataset-2023-3-5m-clans
 
-### Health Data
+### Health Data: I wanted to explore the health insurance data
 * Health Insurance Marketplace
 * https://www.kaggle.com/datasets/hhs/health-insurance-marketplace
 
-### Sales Data
+### Sales Data: I am curious to see how amazon product sales datasets looks like
 * Amazon Products Sales Dataset 2023
 * https://www.kaggle.com/datasets/lokeshparab/amazon-products-dataset
