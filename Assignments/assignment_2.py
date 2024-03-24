@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA, FastICA
 import sys
+from scipy.stats import ttest_ind
 from scipy.io import wavfile
 
 SOURCE_DIRECTORY = "/mnt/research/NOS_mri/CSE801A_Spring2024_A2/"
@@ -46,6 +47,19 @@ plt.ylabel('Mean Bounce Rate')
 # Show the plot
 # plt.show()
 
+# Perform the t-test on the two independent samples
+t_stat, p_value = ttest_ind(new_visitor_bounce_rates, returning_visitor_bounce_rates, equal_var=False)
+
+# Print the t-statistic and the p-value
+print(f'T-statistic: {t_stat}, P-value: {p_value}')
+
+# Conclusions
+alpha = 0.05  # Significance level
+if p_value < alpha:
+    print("There is a significant difference in bounce rates between new and returning visitors.")
+else:
+    print("There is no significant difference in bounce rates between new and returning visitors.")
+
 print("Completed 2")
 
 print("Start problem 3")
@@ -82,42 +96,41 @@ print("Completed 3")
 print("Start problem 4")
 
 # Load the wave files
-SOURCE_WAVES_DIRECTORY = "/mnt/home/doggalok/Documents/ITM891_Lokesh/Assignments/Waves/"
-wave_files = ['mix_1.wav', 'mix_2.wav', 'mix_3.wav', 'mix_4.wav', 'mix_5.wav']
-wave_data = []
-for file in wave_files:
-    file = SOURCE_WAVES_DIRECTORY + file
-    sample_rate, data = wavfile.read(file)
-    wave_data.append(data)
-
-# Convert the wave data to a numpy array
-wave_data = np.array(wave_data)
-
-# Apply FastICA to unmix the signals
+fs, mix1 = wavfile.read('/mnt/home/doggalok/Documents/ITM891_Lokesh/Assignments/Waves/mix_1.wav')
+fs, mix2 = wavfile.read('/mnt/home/doggalok/Documents/ITM891_Lokesh/Assignments/Waves/mix_2.wav')
+fs, mix3 = wavfile.read('/mnt/home/doggalok/Documents/ITM891_Lokesh/Assignments/Waves/mix_3.wav')
+fs, mix4 = wavfile.read('/mnt/home/doggalok/Documents/ITM891_Lokesh/Assignments/Waves/mix_4.wav')
+fs, mix5 = wavfile.read('/mnt/home/doggalok/Documents/ITM891_Lokesh/Assignments/Waves/mix_5.wav')
+ 
+# Combine the mixed signals into a single matrix
+mixed_signals = np.column_stack((mix1, mix2, mix3, mix4, mix5))
+ 
+# Perform FastICA to unmix the signals
 ica = FastICA(n_components=5)
-unmixed_signals = ica.fit_transform(wave_data)
-
+unmixed_signals = ica.fit_transform(mixed_signals)
+ 
 # Rescale the unmixed signals to a scale from -1 to 1
-rescaled_signals = []
-for signal in unmixed_signals.T:
-    rescaled_signal = (signal - np.min(signal)) / (np.max(signal) - np.min(signal)) * 2 - 1
-    rescaled_signals.append(rescaled_signal)
-
-# Convert the rescaled signals to float32
-rescaled_signals = np.array(rescaled_signals, dtype=np.float32)
-
+unmixed_signals = unmixed_signals / np.max(np.abs(unmixed_signals))
+ 
 # Write out the unmixed signals as wave files
-for i, signal in enumerate(rescaled_signals):
-    wavfile.write(f'unmixed_song{i+1}.wav', sample_rate, signal)
-
+wavfile.write('unmixed1.wav', fs, unmixed_signals[:, 0].astype(np.float32))
+wavfile.write('unmixed2.wav', fs, unmixed_signals[:, 1].astype(np.float32))
+wavfile.write('unmixed3.wav', fs, unmixed_signals[:, 2].astype(np.float32))
+wavfile.write('unmixed4.wav', fs, unmixed_signals[:, 3].astype(np.float32))
+wavfile.write('unmixed5.wav', fs, unmixed_signals[:, 4].astype(np.float32))
+  
 # Plot the time courses of the different unmixed songs
-time = np.arange(len(rescaled_signals[0])) / sample_rate
 plt.figure(figsize=(10, 6))
-for i, signal in enumerate(rescaled_signals):
-    plt.plot(time, signal, label=f'Song {i+1}')
-plt.xlabel('Time')
-plt.ylabel('Amplitude')
-plt.legend()
+# Iterate over the columns of unmixed_signals
+for i in range(unmixed_signals.shape[1]):
+    plt.figure(figsize=(10, 6))  # Create a new figure for each signal
+    plt.plot(np.arange(len(unmixed_signals)), unmixed_signals[:, i])
+    plt.xlabel('Time')
+    plt.ylabel('Amplitude')
+    plt.title(f'Unmixed Signal {i+1}')
+    plt.show()
+
+plt.tight_layout()
 # plt.show()
 
 print("Completed 4")
